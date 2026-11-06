@@ -15,3 +15,11 @@ export interface Organisation {
   ownerEmailValid: boolean;
   createdAt: Date | null;
 }
+
+/** What the create form sends. Already validated and clean. */
+export interface NewOrganisation {
+  name: string;
+  status: KnownStatus;
+  ownerEmail: string;
+  memberCount: number | null;
+}

@@ -20,7 +20,8 @@ type RawRecord = Record<string, unknown>;
 
 // The "database". It lives in memory and is reset on every page reload.
 const records: RawRecord[] = [...(fixture as RawRecord[])];
-
+// Organisations created through POST. Kept apart from the paged fixture so its total of 137 stays stable.
+const added: RawRecord[] = [];
 // When each accepted list request happened, to enforce the rate limit.
 const requestTimes: number[] = [];
 
@@ -93,6 +94,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // POST /api/organisations (used by the create form in Phase 7)
+    // POST /api/organisations
   if (req.method === 'POST') {
     const body = (req.body ?? {}) as RawRecord;
     const name = normaliseName(body['name']);
@@ -100,13 +102,19 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
     if (name === '') {
       return delayed(fail(400, 'Name is required'));
     }
-    if (records.some((record) => normaliseName(record['name']) === name)) {
+
+    // The server checks ALL records, even pages the browser has not loaded yet.
+    const everything = [...records, ...added];
+    if (everything.some((record) => normaliseName(record['name']) === name)) {
       return delayed(fail(409, 'An organisation with this name already exists'));
     }
 
-    const highestId = Math.max(0, ...records.map((r) => (typeof r['id'] === 'number' ? r['id'] : 0)));
+    const highestId = Math.max(
+      0,
+      ...everything.map((record) => (typeof record['id'] === 'number' ? record['id'] : 0)),
+    );
     const created: RawRecord = { ...body, id: highestId + 1, createdAt: new Date().toISOString() };
-    records.push(created);
+    added.push(created);
     return delayed(ok(201, created));
   }
 

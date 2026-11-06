@@ -8,7 +8,7 @@ import {
   RATE_WINDOW_MS,
 } from '../../core/mock-api/mock-api.interceptor';
 import { toOrganisation } from './organisation.mapper';
-import { Organisation } from './organisation.model';
+import { NewOrganisation, Organisation } from './organisation.model';
 
 interface PageResponse {
   items: unknown[];
@@ -17,12 +17,16 @@ interface PageResponse {
 
 export type LoadState = 'loading' | 'ready' | 'error';
 
+/** Keeps keys of created rows apart from the keys of API rows (positions 0 to 136). */
+const CREATED_POSITION_BASE = 10_000;
+
 @Injectable({ providedIn: 'root' })
 export class OrganisationStore {
   private readonly http = inject(HttpClient);
 
   // Raw state, private. Pages are kept by number so a retry can fill a gap in place.
   private readonly pages = signal<ReadonlyMap<number, Organisation[]>>(new Map());
+  private readonly createdOrgs = signal<readonly Organisation[]>([]);
   private readonly firstPageFailed = signal(false);
   private readonly running = signal(false);
   private readonly waiting = signal(0);
@@ -38,14 +42,50 @@ export class OrganisationStore {
   readonly isLoadingMore = this.running.asReadonly();
   readonly waitSeconds = this.waiting.asReadonly();
 
-  readonly organisations = computed<Organisation[]>(() =>
+  private readonly fromApi = computed<Organisation[]>(() =>
     [...this.pages().entries()].sort(([a], [b]) => a - b).flatMap(([, items]) => items),
+  );
+
+  /** How many rows came from the paged API. The progress line compares this with `total`. */
+  readonly loadedFromApi = computed(() => this.fromApi().length);
+
+  /** Newly created organisations first, then the API rows. */
+  readonly organisations = computed<Organisation[]>(() => [
+    ...this.createdOrgs(),
+    ...this.fromApi(),
+  ]);
+
+  private readonly knownNames = computed(
+    () =>
+      new Set(
+        this.organisations().flatMap((org) => (org.name === null ? [] : [org.name.toLowerCase()])),
+      ),
   );
 
   readonly state = computed<LoadState>(() => {
     if (this.pages().has(1)) return 'ready';
     return this.firstPageFailed() ? 'error' : 'loading';
   });
+
+  /** Case-insensitive. Only knows the names loaded so far; the server has the final say. */
+  nameExists(name: string): boolean {
+    return this.knownNames().has(name.trim().toLowerCase());
+  }
+
+  /** Throws HttpErrorResponse on failure (409 = duplicate name). */
+  async create(input: NewOrganisation): Promise<void> {
+    const body = {
+      name: input.name,
+      status: input.status,
+      owner: { email: input.ownerEmail },
+      ...(input.memberCount === null ? {} : { memberCount: input.memberCount }),
+    };
+    const response = await firstValueFrom(this.http.post<unknown>(API_URL, body));
+    this.createdOrgs.update((list) => [
+      toOrganisation(response, CREATED_POSITION_BASE + list.length),
+      ...list,
+    ]);
+  }
 
   /** Loads page 1, then every missing page in the background. Calling it again is the retry. */
   async load(): Promise<void> {

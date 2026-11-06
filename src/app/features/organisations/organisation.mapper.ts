@@ -1,6 +1,6 @@
 import { KNOWN_STATUSES, KnownStatus, Organisation, OrgStatus } from './organisation.model';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Raw = Record<string, unknown>;
 
