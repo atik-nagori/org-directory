@@ -1,0 +1,70 @@
+.list-title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-lg);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: var(--space-3) var(--space-4);
+  text-align: start;
+  vertical-align: middle;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+thead th {
+  background: var(--color-bg);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+tbody tr:hover {
+  background: var(--color-bg);
+}
+
+.numeric {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.sort-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Long names: one line, ellipsis. The full name is in the tooltip. */
+.name-text {
+  display: block;
+  max-width: var(--size-name-column);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.invalid-email {
+  color: var(--color-warning);
+}
+
+a {
+  color: var(--color-brand);
+}

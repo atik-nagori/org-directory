@@ -1,0 +1,79 @@
+<section>
+  <h2 class="list-title">{{ 'list.title' | t }}</h2>
+
+  @if (store.state() === 'ready') {
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">{{ 'list.title' | t }}</caption>
+        <thead>
+          <tr>
+            <th scope="col" [attr.aria-sort]="ariaSort('name')">
+              <button type="button" class="sort-button" (click)="toggleSort('name')">
+                {{ 'list.columns.name' | t }}
+                <span aria-hidden="true">{{ sortIndicator('name') }}</span>
+              </button>
+            </th>
+            <th scope="col">{{ 'list.columns.status' | t }}</th>
+            <th scope="col" class="numeric">{{ 'list.columns.members' | t }}</th>
+            <th scope="col">{{ 'list.columns.owner' | t }}</th>
+            <th scope="col" [attr.aria-sort]="ariaSort('created')">
+              <button type="button" class="sort-button" (click)="toggleSort('created')">
+                {{ 'list.columns.created' | t }}
+                <span aria-hidden="true">{{ sortIndicator('created') }}</span>
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- track by key, NOT id: the API has duplicate ids -->
+          @for (org of rows(); track org.key) {
+            <tr>
+              <td>
+                @if (org.name; as name) {
+                  <span class="name-text" dir="auto" [title]="name">{{ name }}</span>
+                } @else {
+                  <span class="muted">{{ 'common.unnamed' | t }}</span>
+                }
+              </td>
+
+              <td><app-status-badge [status]="org.status" /></td>
+
+              <td class="numeric">
+                @if (org.memberCount !== null) {
+                  {{ org.memberCount | number }}
+                } @else {
+                  {{ 'common.empty' | t }}
+                }
+              </td>
+
+              <td>
+                @if (org.ownerEmail === null) {
+                  {{ 'common.empty' | t }}
+                } @else if (org.ownerEmailValid) {
+                  <a [href]="'mailto:' + org.ownerEmail">{{ org.ownerEmail }}</a>
+                } @else {
+                  <span class="invalid-email" [title]="'list.invalidEmail' | t">
+                    {{ org.ownerEmail }}
+                    <span aria-hidden="true">⚠</span>
+                    <span class="visually-hidden">({{ 'list.invalidEmail' | t }})</span>
+                  </span>
+                }
+              </td>
+
+              <td>
+                @if (org.createdAt; as created) {
+                  <time [attr.datetime]="created.toISOString()">{{
+                    created | date: 'mediumDate' : 'UTC'
+                  }}</time>
+                } @else {
+                  <span [title]="'list.invalidDate' | t">{{ 'common.empty' | t }}</span>
+                  <span class="visually-hidden">{{ 'list.invalidDate' | t }}</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
