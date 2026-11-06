@@ -86,6 +86,20 @@ All cleaning happens in one function, `toOrganisation` in `organisation.mapper.t
 - "No results" (data exists, filter matches nothing) is a different state from "no data at all", with its own message and a Clear filters button. The filter bar stays mounted so the search box keeps focus.
 - The result count ("Showing X of Y loaded") appears only when a filter is active, in a `role="status"` region so screen readers hear it.
 
+## Create form (FR3)
+- The form is its own page (`/new`), not a panel on the list. It keeps the list component smaller, gives the form a URL, and is easy to extend live. Created organisations live in the store, so they survive navigation.
+- Typed, non-nullable reactive form: every control has a default (`''`), so `reset()` never produces null. Member count is a text input that is converted to a number on submit. A `type="number"` control would be nullable.
+- Errors show after blur (the control is "touched"), not while typing for the first time. After a blur they update live, so the message disappears as soon as the value is fixed. On submit, every field is marked as touched.
+- The submit button is not the only signal. Four things tell the user something is wrong: an error summary at the top that takes focus and links to each field, a message under each field with a `!` icon, a thicker border on the field, and `aria-invalid` and `aria-describedby` for screen readers. The submit button is never disabled for an invalid form, because a disabled button hides the reason. It is only disabled while saving.
+- Reactive forms are not signals, so `form.events` is converted with `toSignal` and the error messages are `computed`. Rejected: calling `control.hasError()` directly in the template (it depends on change detection).
+- The name rules live in one custom validator that works on the trimmed value (required, 3-80, unique). Rejected: the built-in `minLength` (it counts leading and trailing spaces, so three spaces would be a valid name).
+- Unique name, case-insensitive: compared against all names loaded so far. Because of Conflict 1, pages may still be loading, so the server also checks every record and answers 409. The form turns that into the same "already exists" message. Trade-off: for a short moment after opening the page, the check is server-only.
+- The email check uses the same regex as the list mapper (`EMAIL_PATTERN`), so "valid" means the same thing everywhere. It is deliberately simple: one `@` and a dot in the domain. Rejected: Angular's `Validators.email`, which accepts `a@b`.
+- Status options are the three known statuses. "Unknown" is not offered, because a new organisation should have a real status. Unknown exists only for bad legacy data.
+- After success the form clears, shows a confirmation inside an always-present `role="status"` region, and moves focus back to Name, so ops can add several in a row.
+- New organisations are shown at the top of the list, and are kept apart from the API rows. In the mock API they are stored separately from the paged fixture, so the total stays at 137 and a later page never repeats a created row. A real API would include them in the paged list.
+- Not done: draft saving, a "discard changes?" prompt, and a loading state for the unique check. With more time I would add the unsaved-changes prompt.
+
 ## Fixture data quirks
 _(to be filled in Phase 3)_
 
@@ -94,6 +108,9 @@ _(to be filled in Phase 3)_
 - Unknown or typo statuses are shown as "Unknown" rather than corrected or hidden.
 - The loader imports the API limits (25 per page, 5 per minute) from the mock API file. In a real app they would come from config or the API itself.
 - Unnamed organisations and missing values still appear in the list. I did not hide bad data from ops, I made it visible.
+
+- Member count is optional and must be a whole number, 0 or more. Decimals are rejected rather than rounded.
+- Created organisations are in memory only and disappear on reload, like the rest of the mock API.
 
 ## AI tool declaration
 - I used Claude as a pair-programming assistant throughout this project.
@@ -109,3 +126,5 @@ _(to be filled in Phase 3)_
 - Phase 4: Claude drafted the status badge, the list component and the table styles. I ran it and checked each quirk on screen: unnamed rows, Arabic, long names, bad email, bad date, duplicate ids, sorting and keyboard use.
 - Phase 5: Claude drafted the state panel, the banners and the list template changes. I forced each state by changing the mock API settings, checked that they look different, and tested both retry paths.
 - Phase 6: Claude drafted the URL-synced search and filter, the debounce and the filtered empty state. I tested typing, the status filter, shared URLs, an invalid status in the URL, Back button behaviour, and filtering while pages were still loading.
+
+- Phase 7: Claude drafted the form component, the validators, the store changes and the mock API POST handling. I tested each rule and the blur behaviour, the error summary and its links, the case-insensitive duplicate, a valid submit, keyboard-only use, and the server 409 path.
