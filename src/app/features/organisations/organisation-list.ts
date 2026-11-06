@@ -1,3 +1,4 @@
+import { StatePanel } from '../../shared/state-panel';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { TranslatePipe } from '../../core/i18n/i18n.translet';
@@ -24,7 +25,7 @@ function compareNullsLast<T>(
 
 @Component({
   selector: 'app-organisation-list',
-  imports: [TranslatePipe, StatusBadge, DatePipe, DecimalPipe],
+  imports: [StatePanel, TranslatePipe, StatusBadge, DatePipe, DecimalPipe],
   templateUrl: './organisation-list.html',
   styleUrl: './organisation-list.css',
 })
@@ -53,6 +54,18 @@ export class OrganisationList {
           ),
     );
   });
+
+    protected readonly loadedCount = computed(() => this.store.organisations().length);
+
+  /** True while pages are still missing, either loading or failed. */
+  protected readonly isIncomplete = computed(() => {
+    const total = this.store.total();
+    return total !== null && this.loadedCount() < total;
+  });
+
+  protected retry(): void {
+    void this.store.load(); // skips pages it already has
+  }
 
   constructor() {
     void this.store.load();

@@ -68,3 +68,47 @@ tbody tr:hover {
 a {
   color: var(--color-brand);
 }
+
+.button {
+  margin-top: var(--space-3);
+  padding: 0 var(--space-4);
+  height: var(--size-control-height);
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-brand-contrast);
+  background: var(--color-brand);
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--color-brand-hover);
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.banner-warning {
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+  border-color: var(--color-warning);
+}
+
+.banner .button {
+  margin-top: 0;
+}
+
+.wait {
+  margin: var(--space-1) 0 0;
+}
