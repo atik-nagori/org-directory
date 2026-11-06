@@ -67,6 +67,15 @@ All cleaning happens in one function, `toOrganisation` in `organisation.mapper.t
 - Dates are displayed in UTC. Some values are date-only strings, and local time could show them a day early in some time zones.
 - Valid owner emails are `mailto:` links. Invalid emails are shown as plain text with a warning symbol and hidden text for screen readers, so the warning is not colour alone.
 
+## States (FR4)
+- Loading, empty and error each use the same `StatePanel` component but look different: loading is a plain panel with a `…` icon, empty has a dashed border and `○`, error is red with `!` and a Retry button. They differ by border style and icon, not only colour.
+- Error and warning use `role="alert"`; loading, empty and progress use `role="status"`, so screen readers announce changes.
+- Retry calls the same `load()`, which skips pages already loaded. A failed first page retries page 1; a failed background page retries only the missing pages.
+- A background failure does not replace the table with an error screen. The loaded rows stay visible and a warning banner offers a retry. Rejected: one big error state, because it would hide 100+ good records because of one failed page.
+- Progress ("Loaded X of 137") and the rate-limit countdown are shown above the table. The countdown is outside the live region so a screen reader isn't interrupted every second.
+- The empty state currently means "no data at all". The "no results for this search" variant comes with search and filter.
+- Tested by temporarily changing the delay, failure rate and fixture in the mock API (reverted afterwards).
+
 ## Fixture data quirks
 _(to be filled in Phase 3)_
 
@@ -88,3 +97,4 @@ _(to be filled in Phase 3)_
 - Phase 2: Claude drafted the fixture generator and the mock API interceptor. I ran it, read through the generated JSON, and tested the 25-record limit, the 500 errors and the 429 response from the console.
 - Phase 3: Claude drafted the model, the mapper and the store. I ran it, checked the first 8 rows against the fixture, watched the rate-limit countdown, and tested retrying a failed page.
 - Phase 4: Claude drafted the status badge, the list component and the table styles. I ran it and checked each quirk on screen: unnamed rows, Arabic, long names, bad email, bad date, duplicate ids, sorting and keyboard use.
+- Phase 5: Claude drafted the state panel, the banners and the list template changes. I forced each state by changing the mock API settings, checked that they look different, and tested both retry paths.
