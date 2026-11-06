@@ -1,12 +1,13 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, DestroyRef, computed, inject, linkedSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../core/i18n/i18n.translet';
 import { StatePanel } from '../../shared/state-panel';
 import { StatusBadge } from '../../shared/status-badge';
 import { KNOWN_STATUSES, OrgStatus } from './organisation.model';
 import { OrganisationStore } from './organisation.store';
+
 
 type SortKey = 'name' | 'created';
 type SortDirection = 'asc' | 'desc';
@@ -31,7 +32,7 @@ function compareNullsLast<T>(
 
 @Component({
   selector: 'app-organisation-list',
-  imports: [TranslatePipe, StatusBadge, StatePanel, DatePipe, DecimalPipe],
+  imports: [TranslatePipe, StatusBadge, StatePanel, DatePipe, DecimalPipe, RouterLink],
   templateUrl: './organisation-list.html',
   styleUrl: './organisation-list.css',
 })
@@ -109,9 +110,9 @@ export class OrganisationList {
   protected readonly loadedCount = computed(() => this.store.organisations().length);
 
   /** True while pages are still missing, either loading or failed. */
-  protected readonly isIncomplete = computed(() => {
+    protected readonly isIncomplete = computed(() => {
     const total = this.store.total();
-    return total !== null && this.loadedCount() < total;
+    return total !== null && this.store.loadedFromApi() < total;
   });
 
   constructor() {

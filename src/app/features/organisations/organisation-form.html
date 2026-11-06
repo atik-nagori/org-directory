@@ -1,0 +1,121 @@
+<section>
+  <div class="form-header">
+    <h2 class="form-title">{{ 'form.title' | t }}</h2>
+    <a routerLink="/" class="back-link">{{ 'form.backToList' | t }}</a>
+  </div>
+
+  <!-- The live region is always on screen, so screen readers announce what appears inside it -->
+  <div role="status">
+    @if (success()) {
+      <div class="banner banner-success">
+        <span aria-hidden="true">✓</span>
+        <span>{{ 'form.success' | t }}</span>
+        <a routerLink="/" class="back-link">{{ 'form.backToList' | t }}</a>
+      </div>
+    }
+  </div>
+
+  @if (serverError()) {
+    <div class="banner banner-error" role="alert">
+      <span aria-hidden="true">!</span>
+      <span>{{ 'form.errors.server' | t }}</span>
+    </div>
+  }
+
+  @if (summary().length > 0) {
+    <div #summary class="error-summary" role="alert" tabindex="-1">
+      <p class="summary-title">{{ 'form.summaryTitle' | t }}</p>
+      <ul>
+        @for (item of summary(); track item.field) {
+          <li>
+            <button type="button" class="link-button" (click)="focusField(item.field)">
+              {{ item.message }}
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label [for]="ids.name">{{ 'form.name' | t }}</label>
+      <input
+        #nameInput
+        [id]="ids.name"
+        type="text"
+        formControlName="name"
+        autocomplete="off"
+        dir="auto"
+        [attr.aria-invalid]="errors().name ? 'true' : null"
+        [attr.aria-describedby]="errors().name ? ids.name + '-error' : null"
+      />
+      @if (errors().name; as message) {
+        <p class="error" [id]="ids.name + '-error'">
+          <span aria-hidden="true">!</span> {{ message }}
+        </p>
+      }
+    </div>
+
+    <div class="field">
+      <label [for]="ids.status">{{ 'form.status' | t }}</label>
+      <select
+        [id]="ids.status"
+        formControlName="status"
+        [attr.aria-invalid]="errors().status ? 'true' : null"
+        [attr.aria-describedby]="errors().status ? ids.status + '-error' : null"
+      >
+        <option value="">{{ 'form.statusPlaceholder' | t }}</option>
+        @for (option of statusOptions; track option) {
+          <option [value]="option">{{ 'status.' + option | t }}</option>
+        }
+      </select>
+      @if (errors().status; as message) {
+        <p class="error" [id]="ids.status + '-error'">
+          <span aria-hidden="true">!</span> {{ message }}
+        </p>
+      }
+    </div>
+
+    <div class="field">
+      <label [for]="ids.ownerEmail">{{ 'form.ownerEmail' | t }}</label>
+      <input
+        [id]="ids.ownerEmail"
+        type="email"
+        formControlName="ownerEmail"
+        autocomplete="off"
+        [attr.aria-invalid]="errors().ownerEmail ? 'true' : null"
+        [attr.aria-describedby]="errors().ownerEmail ? ids.ownerEmail + '-error' : null"
+      />
+      @if (errors().ownerEmail; as message) {
+        <p class="error" [id]="ids.ownerEmail + '-error'">
+          <span aria-hidden="true">!</span> {{ message }}
+        </p>
+      }
+    </div>
+
+    <div class="field">
+      <label [for]="ids.memberCount">{{ 'form.memberCount' | t }}</label>
+      <input
+        [id]="ids.memberCount"
+        type="text"
+        inputmode="numeric"
+        formControlName="memberCount"
+        autocomplete="off"
+        [attr.aria-invalid]="errors().memberCount ? 'true' : null"
+        [attr.aria-describedby]="errors().memberCount ? ids.memberCount + '-error' : null"
+      />
+      @if (errors().memberCount; as message) {
+        <p class="error" [id]="ids.memberCount + '-error'">
+          <span aria-hidden="true">!</span> {{ message }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <button type="submit" class="button" [disabled]="saving()">
+        {{ saving() ? ('form.submitting' | t) : ('form.submit' | t) }}
+      </button>
+    </div>
+  </form>
+</section>

@@ -1,6 +1,8 @@
 <section>
-  <h2 class="list-title">{{ 'list.title' | t }}</h2>
-
+  <div class="list-header">
+    <h2 class="list-title">{{ 'list.title' | t }}</h2>
+    <a routerLink="/new" class="button button-link">{{ 'form.open' | t }}</a>
+  </div>
   @switch (store.state()) {
     @case ('loading') {
       <app-state-panel kind="loading" [title]="'states.loading' | t">
@@ -70,8 +72,8 @@
             </div>
           } @else {
             <div class="banner">
-              <span role="status">{{
-                'list.progress' | t: { loaded: loadedCount(), total: store.total() ?? 0 }
+            <span role="status">{{
+                'list.progress' | t: { loaded: store.loadedFromApi(), total: store.total() ?? 0 }
               }}</span>
               <!-- outside the status element on purpose: a countdown would be read out every second -->
               @if (store.waitSeconds() > 0) {

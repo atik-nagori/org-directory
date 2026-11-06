@@ -112,3 +112,77 @@ a {
 .wait {
   margin: var(--space-1) 0 0;
 }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field-grow {
+  flex: 1 1 var(--size-field-min);
+}
+
+.field label {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+}
+
+.field input,
+.field select {
+  height: var(--size-control-height);
+  padding: 0 var(--space-3);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.filters .button {
+  margin-top: 0;
+}
+
+.button-secondary {
+  color: var(--color-brand);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-brand);
+}
+
+.button-secondary:hover {
+  color: var(--color-brand-contrast);
+}
+
+.result-count {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.list-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.list-header .list-title {
+  margin: 0;
+}
+
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0;
+  text-decoration: none;
+}
