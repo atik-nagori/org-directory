@@ -75,6 +75,16 @@ All cleaning happens in one function, `toOrganisation` in `organisation.mapper.t
 - Progress ("Loaded X of 137") and the rate-limit countdown are shown above the table. The countdown is outside the live region so a screen reader isn't interrupted every second.
 - The empty state currently means "no data at all". The "no results for this search" variant comes with search and filter.
 - Tested by temporarily changing the delay, failure rate and fixture in the mock API (reverted afterwards).
+## Search and filter (FR2)
+- The URL is the source of truth. `q` and `status` are read from the query params into signals (`toSignal` on `queryParamMap`), and changes are written back with `router.navigate` (merge, `replaceUrl`). A filtered view can be shared, reloaded and used with Back and Forward.
+- Search is debounced by 300 ms with a plain `setTimeout`, cleared on every keystroke and on destroy. Rejected: an RxJS `Subject` with `debounceTime` (more code for one timer) and a `BehaviorSubject` (the brief says no BehaviorSubject for view state).
+- `replaceUrl: true`, so typing and filtering don't fill the browser history with one entry per change. Trade-off: Back doesn't step through earlier filters.
+- The search box follows the URL through a `linkedSignal`, so Back and Clear filters update it. It keeps the user's own text if it only differs by spaces, so typing "north wind" works.
+- Matching is a case-insensitive "contains" on the name. Unnamed organisations never match a search, but they appear when there is no search text. Not done: accent-insensitive search and fuzzy matching.
+- The status filter has an "Unknown" option, so the typo and null statuses can be found and cleaned up by ops. An invalid `status` in the URL is ignored and means "All".
+- Filtering is client-side and runs on what has loaded so far (Conflict 1), so early results may be incomplete. The progress banner stays visible above the results, and the count updates as pages arrive.
+- "No results" (data exists, filter matches nothing) is a different state from "no data at all", with its own message and a Clear filters button. The filter bar stays mounted so the search box keeps focus.
+- The result count ("Showing X of Y loaded") appears only when a filter is active, in a `role="status"` region so screen readers hear it.
 
 ## Fixture data quirks
 _(to be filled in Phase 3)_
@@ -98,3 +108,4 @@ _(to be filled in Phase 3)_
 - Phase 3: Claude drafted the model, the mapper and the store. I ran it, checked the first 8 rows against the fixture, watched the rate-limit countdown, and tested retrying a failed page.
 - Phase 4: Claude drafted the status badge, the list component and the table styles. I ran it and checked each quirk on screen: unnamed rows, Arabic, long names, bad email, bad date, duplicate ids, sorting and keyboard use.
 - Phase 5: Claude drafted the state panel, the banners and the list template changes. I forced each state by changing the mock API settings, checked that they look different, and tested both retry paths.
+- Phase 6: Claude drafted the URL-synced search and filter, the debounce and the filtered empty state. I tested typing, the status filter, shared URLs, an invalid status in the URL, Back button behaviour, and filtering while pages were still loading.
