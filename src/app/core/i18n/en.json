@@ -1,0 +1,72 @@
+{
+  "app": {
+    "title": "Organisation Directory",
+    "skipToContent": "Skip to main content"
+  },
+  "common": {
+    "unnamed": "Unnamed organisation",
+    "empty": "—",
+    "retry": "Retry",
+    "clearFilters": "Clear filters"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "suspended": "Suspended",
+    "unknown": "Unknown"
+  },
+  "list": {
+    "title": "Organisations",
+    "columns": {
+      "name": "Name",
+      "status": "Status",
+      "members": "Members",
+      "owner": "Owner",
+      "created": "Created"
+    },
+    "sortAscending": "sorted ascending",
+    "sortDescending": "sorted descending",
+    "invalidEmail": "Invalid email address",
+    "invalidDate": "Invalid date",
+    "progress": "Loaded {loaded} of {total} organisations",
+    "resultCount": "Showing {shown} of {loaded} loaded organisations"
+  },
+  "filters": {
+    "searchLabel": "Search by name",
+    "searchPlaceholder": "Type a name…",
+    "statusLabel": "Status",
+    "statusAll": "All statuses"
+  },
+  "states": {
+    "loading": "Loading organisations…",
+    "emptyTitle": "No organisations to show",
+    "emptyFiltered": "No organisations match your search or filter.",
+    "errorTitle": "Could not load organisations",
+    "errorMessage": "Something went wrong while loading. Please try again.",
+    "pageFailed": "Some organisations could not be loaded.",
+    "rateLimited": "Waiting for the request limit to reset, {seconds}s…"
+  },
+  "form": {
+    "title": "Add organisation",
+    "open": "Add organisation",
+    "close": "Cancel",
+    "name": "Name",
+    "status": "Status",
+    "ownerEmail": "Owner email",
+    "memberCount": "Member count (optional)",
+    "statusPlaceholder": "Choose a status",
+    "submit": "Create organisation",
+    "summaryTitle": "Please fix the following:",
+    "success": "Organisation created.",
+    "errors": {
+      "nameRequired": "Name is required.",
+      "nameMinLength": "Name must be at least {min} characters.",
+      "nameMaxLength": "Name must be at most {max} characters.",
+      "nameDuplicate": "An organisation with this name already exists.",
+      "statusRequired": "Status is required.",
+      "emailRequired": "Owner email is required.",
+      "emailInvalid": "Enter a valid email address.",
+      "memberCountMin": "Member count must be 0 or more."
+    }
+  }
+}
