@@ -123,7 +123,7 @@ export class OrganisationForm {
     });
   });
 
-  private readonly summaryRef = viewChild<ElementRef<HTMLElement>>('summary');
+  private readonly summaryRef = viewChild<ElementRef<HTMLElement>>('summaryBox');
   private readonly nameInput = viewChild.required<ElementRef<HTMLInputElement>>('nameInput');
 
   constructor() {

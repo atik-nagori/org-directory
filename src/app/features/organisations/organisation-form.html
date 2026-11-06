@@ -23,7 +23,7 @@
   }
 
   @if (summary().length > 0) {
-    <div #summary class="error-summary" role="alert" tabindex="-1">
+    <div #summaryBox class="error-summary" role="alert" tabindex="-1">
       <p class="summary-title">{{ 'form.summaryTitle' | t }}</p>
       <ul>
         @for (item of summary(); track item.field) {
