@@ -17,6 +17,24 @@
 - Rejected: `@ngx-translate` and Angular's built-in i18n. Both add setup the brief doesn't need.
 
 ## Conflict 1: one page vs. API limits
+- The conflict: ops wants everything on one page with no pagination. The API gives max 25 records per request, 137 total, and 5 requests per minute. 137 / 25 = 6 requests, so the full list cannot arrive within one minute.
+- Chose: no pagination UI. Page 1 loads and shows immediately. The other pages load in the background, one at a time, and the list grows. A progress line shows "Loaded X of 137", and a countdown shows while the loader waits for the rate limit to reset. Search and sort work on whatever has loaded.
+- How: the loader remembers when each request was sent and waits before the 6th one. If the server still answers 429, it waits for `Retry-After` and retries the same page. A page that fails with a 500 is recorded and can be retried alone without reloading the rest.
+- Gave up: the full list is not instant. The 6th page arrives about a minute after the first, and the list isn't complete before then. Search and filter results can be incomplete until it is.
+- Also gave up: the unique-name check on the create form only knows the names loaded so far. The server is the final check (it returns 409 on a duplicate), and the form shows that error.
+- Rejected: classic pagination (breaks the "one page" requirement), infinite scroll (still needs the same rate-limit handling and hides records from search), and firing all 6 requests at once (the 6th is guaranteed to get a 429).
+
+## Fixture data quirks
+All cleaning happens in one function, `toOrganisation` in `organisation.mapper.ts`. The UI only sees clean, typed data.
+- Empty or null name: becomes `null`, the UI shows "Unnamed organisation".
+- Status in mixed case (`ACTIVE`, `Active`): lowercased and trimmed.
+- Status typo (`actve`) or null: becomes `unknown`. I did not guess that "actve" means "active". A wrong guess would hide bad data from the ops team, and an explicit "Unknown" is honest.
+- Member count as a string (`"12"`): converted to a number. Negative, null or non-integer values become `null` and show "—".
+- Missing owner: `null`, shows "—".
+- Invalid email (`not-an-email`): kept as text but flagged `ownerEmailValid: false`, so it won't become a mailto link.
+- Dates as ISO strings or epoch milliseconds: both become `Date`. `"not a date"` becomes `null`, shows "—" and sorts last.
+- Duplicate ids (id 42 twice): `id` is not used as a key. Each row gets a key from its position in the full list.
+- The messiest quirk, for the video: the duplicate id. It silently breaks `@for` tracking and any "find by id" logic, and nothing warns you.
 ## Mock API
 - No backend. An Angular functional HTTP interceptor answers `/api/organisations` in the browser, so the app also works on static hosting. It never calls the network for that URL.
 - Behaviour on the list request: 400-900 ms random delay, ~15% random 500 errors, maximum 25 records per request (a bigger `pageSize` is clamped to 25), and 5 list requests per rolling minute. Extra requests get a 429 with a `Retry-After` header.
@@ -38,6 +56,8 @@ _(to be filled in Phase 3)_
 
 ## Assumptions
 - The "137 records total" in the API brief is the fixture size; I generated exactly 137.
+- Unknown or typo statuses are shown as "Unknown" rather than corrected or hidden.
+- The loader imports the API limits (25 per page, 5 per minute) from the mock API file. In a real app they would come from config or the API itself.
 
 ## AI tool declaration
 - I used Claude as a pair-programming assistant throughout this project.
@@ -49,3 +69,4 @@ _(to be filled in Phase 3)_
 
 - Phase 1: Claude drafted the tokens file, the i18n service/pipe and the app shell. I ran it and checked that changing a token and a string updates the UI.
 - Phase 2: Claude drafted the fixture generator and the mock API interceptor. I ran it, read through the generated JSON, and tested the 25-record limit, the 500 errors and the 429 response from the console.
+- Phase 3: Claude drafted the model, the mapper and the store. I ran it, checked the first 8 rows against the fixture, watched the rate-limit countdown, and tested retrying a failed page.
