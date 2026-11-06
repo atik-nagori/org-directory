@@ -21,9 +21,44 @@
     }
 
     @case ('ready') {
-      @if (rows().length === 0) {
+      @if (loadedCount() === 0) {
         <app-state-panel kind="empty" [title]="'states.emptyTitle' | t" />
       } @else {
+        <!-- The filter bar is outside the results check, so the search box never loses focus -->
+        <div class="filters">
+          <div class="field field-grow">
+            <label for="org-search">{{ 'filters.searchLabel' | t }}</label>
+            <input
+              id="org-search"
+              type="search"
+              autocomplete="off"
+              [value]="searchText()"
+              [placeholder]="'filters.searchPlaceholder' | t"
+              (input)="onSearchInput($event)"
+            />
+          </div>
+
+          <div class="field">
+            <label for="org-status">{{ 'filters.statusLabel' | t }}</label>
+            <select id="org-status" (change)="onStatusChange($event)">
+              <option value="" [selected]="statusFilter() === ''">
+                {{ 'filters.statusAll' | t }}
+              </option>
+              @for (option of statusOptions; track option) {
+                <option [value]="option" [selected]="statusFilter() === option">
+                  {{ 'status.' + option | t }}
+                </option>
+              }
+            </select>
+          </div>
+
+          @if (hasFilters()) {
+            <button type="button" class="button button-secondary" (click)="clearFilters()">
+              {{ 'common.clearFilters' | t }}
+            </button>
+          }
+        </div>
+
         @if (isIncomplete()) {
           @if (store.failedPages().length > 0 && !store.isLoadingMore()) {
             <div class="banner banner-warning" role="alert">
@@ -46,79 +81,97 @@
           }
         }
 
-        <div class="table-wrap">
-          <table>
-            <caption class="visually-hidden">{{ 'list.title' | t }}</caption>
-            <thead>
-              <tr>
-                <th scope="col" [attr.aria-sort]="ariaSort('name')">
-                  <button type="button" class="sort-button" (click)="toggleSort('name')">
-                    {{ 'list.columns.name' | t }}
-                    <span aria-hidden="true">{{ sortIndicator('name') }}</span>
-                  </button>
-                </th>
-                <th scope="col">{{ 'list.columns.status' | t }}</th>
-                <th scope="col" class="numeric">{{ 'list.columns.members' | t }}</th>
-                <th scope="col">{{ 'list.columns.owner' | t }}</th>
-                <th scope="col" [attr.aria-sort]="ariaSort('created')">
-                  <button type="button" class="sort-button" (click)="toggleSort('created')">
-                    {{ 'list.columns.created' | t }}
-                    <span aria-hidden="true">{{ sortIndicator('created') }}</span>
-                  </button>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- track by key, NOT id: the API has duplicate ids -->
-              @for (org of rows(); track org.key) {
+        @if (rows().length === 0) {
+          <app-state-panel
+            kind="empty"
+            [title]="'states.emptyTitle' | t"
+            [message]="'states.emptyFiltered' | t"
+          >
+            <button type="button" class="button" (click)="clearFilters()">
+              {{ 'common.clearFilters' | t }}
+            </button>
+          </app-state-panel>
+        } @else {
+          @if (hasFilters()) {
+            <p class="result-count" role="status">
+              {{ 'list.resultCount' | t: { shown: rows().length, loaded: loadedCount() } }}
+            </p>
+          }
+
+          <div class="table-wrap">
+            <table>
+              <caption class="visually-hidden">{{ 'list.title' | t }}</caption>
+              <thead>
                 <tr>
-                  <td>
-                    @if (org.name; as name) {
-                      <span class="name-text" dir="auto" [title]="name">{{ name }}</span>
-                    } @else {
-                      <span class="muted">{{ 'common.unnamed' | t }}</span>
-                    }
-                  </td>
-
-                  <td><app-status-badge [status]="org.status" /></td>
-
-                  <td class="numeric">
-                    @if (org.memberCount !== null) {
-                      {{ org.memberCount | number }}
-                    } @else {
-                      {{ 'common.empty' | t }}
-                    }
-                  </td>
-
-                  <td>
-                    @if (org.ownerEmail === null) {
-                      {{ 'common.empty' | t }}
-                    } @else if (org.ownerEmailValid) {
-                      <a [href]="'mailto:' + org.ownerEmail">{{ org.ownerEmail }}</a>
-                    } @else {
-                      <span class="invalid-email" [title]="'list.invalidEmail' | t">
-                        {{ org.ownerEmail }}
-                        <span aria-hidden="true">⚠</span>
-                        <span class="visually-hidden">({{ 'list.invalidEmail' | t }})</span>
-                      </span>
-                    }
-                  </td>
-
-                  <td>
-                    @if (org.createdAt; as created) {
-                      <time [attr.datetime]="created.toISOString()">{{
-                        created | date: 'mediumDate' : 'UTC'
-                      }}</time>
-                    } @else {
-                      <span [title]="'list.invalidDate' | t">{{ 'common.empty' | t }}</span>
-                      <span class="visually-hidden">{{ 'list.invalidDate' | t }}</span>
-                    }
-                  </td>
+                  <th scope="col" [attr.aria-sort]="ariaSort('name')">
+                    <button type="button" class="sort-button" (click)="toggleSort('name')">
+                      {{ 'list.columns.name' | t }}
+                      <span aria-hidden="true">{{ sortIndicator('name') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col">{{ 'list.columns.status' | t }}</th>
+                  <th scope="col" class="numeric">{{ 'list.columns.members' | t }}</th>
+                  <th scope="col">{{ 'list.columns.owner' | t }}</th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('created')">
+                    <button type="button" class="sort-button" (click)="toggleSort('created')">
+                      {{ 'list.columns.created' | t }}
+                      <span aria-hidden="true">{{ sortIndicator('created') }}</span>
+                    </button>
+                  </th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                <!-- track by key, NOT id: the API has duplicate ids -->
+                @for (org of rows(); track org.key) {
+                  <tr>
+                    <td>
+                      @if (org.name; as name) {
+                        <span class="name-text" dir="auto" [title]="name">{{ name }}</span>
+                      } @else {
+                        <span class="muted">{{ 'common.unnamed' | t }}</span>
+                      }
+                    </td>
+
+                    <td><app-status-badge [status]="org.status" /></td>
+
+                    <td class="numeric">
+                      @if (org.memberCount !== null) {
+                        {{ org.memberCount | number }}
+                      } @else {
+                        {{ 'common.empty' | t }}
+                      }
+                    </td>
+
+                    <td>
+                      @if (org.ownerEmail === null) {
+                        {{ 'common.empty' | t }}
+                      } @else if (org.ownerEmailValid) {
+                        <a [href]="'mailto:' + org.ownerEmail">{{ org.ownerEmail }}</a>
+                      } @else {
+                        <span class="invalid-email" [title]="'list.invalidEmail' | t">
+                          {{ org.ownerEmail }}
+                          <span aria-hidden="true">⚠</span>
+                          <span class="visually-hidden">({{ 'list.invalidEmail' | t }})</span>
+                        </span>
+                      }
+                    </td>
+
+                    <td>
+                      @if (org.createdAt; as created) {
+                        <time [attr.datetime]="created.toISOString()">{{
+                          created | date: 'mediumDate' : 'UTC'
+                        }}</time>
+                      } @else {
+                        <span [title]="'list.invalidDate' | t">{{ 'common.empty' | t }}</span>
+                        <span class="visually-hidden">{{ 'list.invalidDate' | t }}</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       }
     }
   }
