@@ -1,0 +1,31 @@
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: calc(var(--space-6) * -2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+}
+
+.skip-link:focus {
+  top: var(--space-2);
+}
+
+.app-header {
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-brand);
+  color: var(--color-brand-contrast);
+}
+
+.app-header h1 {
+  margin: 0 auto;
+  max-width: var(--size-container);
+  font-size: var(--font-size-xl);
+}
+
+.app-main {
+  margin: 0 auto;
+  max-width: var(--size-container);
+  padding: var(--space-5);
+}
