@@ -100,8 +100,20 @@ All cleaning happens in one function, `toOrganisation` in `organisation.mapper.t
 - New organisations are shown at the top of the list, and are kept apart from the API rows. In the mock API they are stored separately from the paged fixture, so the total stays at 137 and a later page never repeats a created row. A real API would include them in the paged list.
 - Not done: draft saving, a "discard changes?" prompt, and a loading state for the unique check. With more time I would add the unsaved-changes prompt.
 
-## Fixture data quirks
-_(to be filled in Phase 3)_
+## Accessibility
+- Status is a dot plus a visible word; invalid fields have a thick border, a `!` icon and text, not just red; the three load states differ by border style, icon and wording. I checked the app in greyscale.
+- Keyboard: every control is reachable, there is a skip link, and focus rings are visible. After an invalid submit, focus moves to the error summary, and each summary item jumps to its field.
+- Screen readers: `aria-sort` on sortable columns, `aria-invalid` and `aria-describedby` on fields, `role="alert"` for errors and `role="status"` for progress, counts and success. The countdown is kept outside the live region so it isn't read out every second.
+- Contrast: I changed the focus colour from orange (about 2.3:1 on white) to a darker red-brown (about 5.8:1), because focus indicators need at least 3:1. Text and status colours were picked for at least 4.5:1.
+- Decorative symbols (`▲ ▼ ⚠ ! ✓ … ○`) are `aria-hidden`; the same meaning is always in translated text beside them, so they are not user-facing strings.
+- Checked with Lighthouse and by hand (keyboard only, 200% zoom, greyscale). Not tested on a real range of screen readers or on a phone.
+- Known gaps: long names are fully visible only in a `title` tooltip (not available on touch or keyboard); no `lang` attribute on mixed-language names; no reduced-motion handling needed because there are no animations.
+
+## Cleanup and checks (FR5, FR6)
+- Grepped the templates for English text and the CSS and TypeScript for hex colours and `px`/`rem` values. The only leftover string was the page title in `index.html`; it is now set from `en.json` with Angular's `Title` service. The disabled opacity became a token.
+- Tests: only the mapper, because it is pure and holds every fixture quirk. Rejected: component tests and end-to-end tests, as the brief sets no coverage target and time was limited. I deleted the generated `app.spec.ts` because it tested the starter page.
+
+
 
 ## Assumptions
 - The "137 records total" in the API brief is the fixture size; I generated exactly 137.
@@ -111,6 +123,14 @@ _(to be filled in Phase 3)_
 
 - Member count is optional and must be a whole number, 0 or more. Decimals are rejected rather than rounded.
 - Created organisations are in memory only and disappear on reload, like the rest of the mock API.
+
+## With two more days
+- Replace the name tooltip with an expandable row that works on touch and keyboard.
+- Add an "unsaved changes" prompt on the create form.
+- Load a JSON per locale and keep the active language in a signal; test the layout with a right-to-left language.
+- Move the rate limit and page size into config, or read them from the API, instead of importing them from the mock.
+- Add component tests for the list, the filters and the form.
+
 
 ## AI tool declaration
 - I used Claude as a pair-programming assistant throughout this project.
@@ -128,3 +148,4 @@ _(to be filled in Phase 3)_
 - Phase 6: Claude drafted the URL-synced search and filter, the debounce and the filtered empty state. I tested typing, the status filter, shared URLs, an invalid status in the URL, Back button behaviour, and filtering while pages were still loading.
 
 - Phase 7: Claude drafted the form component, the validators, the store changes and the mock API POST handling. I tested each rule and the blur behaviour, the error summary and its links, the case-insensitive duplicate, a valid submit, keyboard-only use, and the server 409 path.
+- Phase 8: Claude suggested the sweep commands, the focus colour fix, the mapper tests and the README. I ran every sweep, ran Lighthouse, and did the keyboard, zoom and greyscale checks myself.
