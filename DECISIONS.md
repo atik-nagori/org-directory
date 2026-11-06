@@ -48,8 +48,24 @@ All cleaning happens in one function, `toOrganisation` in `organisation.mapper.t
 - The variants keep the quirks: empty and null names, mixed-case status, typo and null status, numbers as strings, negative and null counts, missing owner, invalid email, epoch dates, an invalid date, duplicate ids, Arabic with emoji, long names. I added names that differ only by case (to test the unique check) and date-only strings.
 - The script uses a fixed seed, so the output is identical on every run.
 
+
 ## Conflict 2: status dot vs. accessibility
-_(to be filled in Phase 4)_
+- The conflict: the designer wants a coloured dot only, no text. The accessibility standard says information must never be conveyed by colour alone.
+- Chose: a coloured dot **plus a visible text label** ("● Active"). The dot stays, so the designer still gets the visual cue. The word makes the status readable for colour-blind users and for anyone on a poor screen.
+- Gave up: some table compactness and the designer's "dot only" look.
+- Rejected: a visually hidden label with a dot (screen readers are fine, but sighted colour-blind users would still see only a colour), and a tooltip only (not available on touch or keyboard).
+- The dot is `aria-hidden`, so screen readers hear the status once.
+- Status colours were also chosen for at least 4.5:1 contrast on white.
+
+## List and table
+- Sorting is client-side with signals. Name sort uses `Intl.Collator` (case-insensitive, handles accents and numbers). Missing names and invalid dates always sort last, in both directions, so unusable rows never lead the list. Sorting is stable, so ties keep the API order.
+- The sort is a `computed`, so it re-sorts automatically when background pages arrive.
+- Sort buttons live inside the column headers and use `aria-sort`, so screen readers announce the sort state.
+- `@for` tracks by the generated `key`, not `id`, because the API has duplicate ids.
+- Long names: one line with an ellipsis, plus a tooltip with the full name. Trade-off: tooltips don't work on touch or keyboard. With more time I'd add an expandable row. Rejected: wrapping, because one 200-character name would make a single row very tall.
+- Arabic and mixed text: `dir="auto"` on the name, so each name picks its own direction. Layout uses `text-align: start` and logical alignment, not left/right.
+- Dates are displayed in UTC. Some values are date-only strings, and local time could show them a day early in some time zones.
+- Valid owner emails are `mailto:` links. Invalid emails are shown as plain text with a warning symbol and hidden text for screen readers, so the warning is not colour alone.
 
 ## Fixture data quirks
 _(to be filled in Phase 3)_
@@ -58,6 +74,7 @@ _(to be filled in Phase 3)_
 - The "137 records total" in the API brief is the fixture size; I generated exactly 137.
 - Unknown or typo statuses are shown as "Unknown" rather than corrected or hidden.
 - The loader imports the API limits (25 per page, 5 per minute) from the mock API file. In a real app they would come from config or the API itself.
+- Unnamed organisations and missing values still appear in the list. I did not hide bad data from ops, I made it visible.
 
 ## AI tool declaration
 - I used Claude as a pair-programming assistant throughout this project.
@@ -70,3 +87,4 @@ _(to be filled in Phase 3)_
 - Phase 1: Claude drafted the tokens file, the i18n service/pipe and the app shell. I ran it and checked that changing a token and a string updates the UI.
 - Phase 2: Claude drafted the fixture generator and the mock API interceptor. I ran it, read through the generated JSON, and tested the 25-record limit, the 500 errors and the 429 response from the console.
 - Phase 3: Claude drafted the model, the mapper and the store. I ran it, checked the first 8 rows against the fixture, watched the rate-limit countdown, and tested retrying a failed page.
+- Phase 4: Claude drafted the status badge, the list component and the table styles. I ran it and checked each quirk on screen: unnamed rows, Arabic, long names, bad email, bad date, duplicate ids, sorting and keyboard use.
