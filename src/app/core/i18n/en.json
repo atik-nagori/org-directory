@@ -39,6 +39,7 @@
   },
   "states": {
     "loading": "Loading organisations…",
+    "retryPages": "Retry failed pages",
     "emptyTitle": "No organisations to show",
     "emptyFiltered": "No organisations match your search or filter.",
     "errorTitle": "Could not load organisations",
