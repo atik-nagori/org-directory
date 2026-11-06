@@ -1,0 +1,58 @@
+:root {
+  /* Brand: change these to re-theme the whole app */
+    --opacity-disabled: 0.7;
+  --color-brand: #1f5fbf;
+  --color-brand-hover: #174a96;
+  --color-brand-contrast: #ffffff;
+
+  /* Surfaces and text */
+  --color-bg: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-text: #1b1f24;
+  --color-text-muted: #5b6470;
+  --color-border: #d0d5dd;
+  --color-focus: #f79009;
+
+  /* Feedback */
+  --color-danger: #b42318;
+  --color-danger-bg: #fef3f2;
+  --color-warning: #b54708;
+  --color-warning-bg: #fffaeb;
+  --color-success: #1a7f37;
+  --color-success-bg: #ecfdf3;
+
+  /* Status dots (always paired with a text label, never colour alone) */
+  --color-status-active: #1a7f37;
+  --color-status-inactive: #5b6470;
+  --color-status-suspended: #b54708;
+  --color-status-unknown: #6941c6;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  /* Typography */
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Arabic", sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-weight-normal: 400;
+  --font-weight-bold: 600;
+  --line-height: 1.5;
+
+  /* Shape and layout */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --border-width: 1px;
+  --size-control-height: 2.5rem;
+  --size-dot: 0.625rem;
+  --size-container: 72rem;
+  --size-name-column: 24rem;
+    --size-field-min: 12rem;
+      --size-form: 32rem;
+}
