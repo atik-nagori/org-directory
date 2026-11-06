@@ -112,7 +112,11 @@ All cleaning happens in one function, `toOrganisation` in `organisation.mapper.t
 ## Cleanup and checks (FR5, FR6)
 - Grepped the templates for English text and the CSS and TypeScript for hex colours and `px`/`rem` values. The only leftover string was the page title in `index.html`; it is now set from `en.json` with Angular's `Title` service. The disabled opacity became a token.
 - Tests: only the mapper, because it is pure and holds every fixture quirk. Rejected: component tests and end-to-end tests, as the brief sets no coverage target and time was limited. I deleted the generated `app.spec.ts` because it tested the starter page.
-
+## Deployment
+- Hosted on Netlify from the GitHub repo; every push to `main` redeploys. The mock API runs in the browser, so no backend is needed.
+- `netlify.toml` rewrites every path to `index.html` (status 200), so deep links such as `/new` and `/?status=active` work on reload. Without it, a shared filtered link would 404.
+- Rejected: GitHub Pages (needs a base-href change and a 404.html workaround for deep links) and StackBlitz (slower, less reliable for a reviewer).
+- Limitation: the mock data lives in memory, so created organisations disappear on reload, and the rate-limit counter resets on reload.
 
 
 ## Assumptions
@@ -149,3 +153,4 @@ All cleaning happens in one function, `toOrganisation` in `organisation.mapper.t
 
 - Phase 7: Claude drafted the form component, the validators, the store changes and the mock API POST handling. I tested each rule and the blur behaviour, the error summary and its links, the case-insensitive duplicate, a valid submit, keyboard-only use, and the server 409 path.
 - Phase 8: Claude suggested the sweep commands, the focus colour fix, the mapper tests and the README. I ran every sweep, ran Lighthouse, and did the keyboard, zoom and greyscale checks myself.
+- Phase 9: Claude suggested the Netlify config and the SPA redirect. I deployed it, fixed any build issues from the log, and tested deep links on the live URL.
